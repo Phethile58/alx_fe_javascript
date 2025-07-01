@@ -1,5 +1,5 @@
 // ====== Configuration ======
-const SERVER_URL = "https://your-project.mockapi.io/quotes" ; // Replace with actual URL
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts" ; // Replace with actual URL
 
 let quotes = [];
 let selectedCategory = "all";

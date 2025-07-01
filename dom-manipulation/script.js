@@ -22,6 +22,35 @@ function showRandomQuote() {
     <P><em>Category: ${quote.category}</em></p>
     `;
 }
+function createAddQuoteForm() {
+  const formContainer = document.getElementById("formContainer");
+
+  // Create elements
+  const inputText = document.createElement("input");
+  inputText.type = "text";
+  inputText.id = "newQuoteText";
+  inputText.placeholder = "Enter a new quote";
+
+  const inputCategory = document.createElement("input");
+  inputCategory.type = "text";
+  inputCategory.id = "newQuoteCategory";
+  inputCategory.placeholder = "Enter quote category";
+
+  const addButton = document.createElement("button");
+  addButton.textContent = "Add Quote";
+  addButton.id = "addQuoteBtn";
+
+  // Attach event listener
+  addButton.addEventListener("click", addQuote);
+
+  // Append to container
+  formContainer.appendChild(inputText);
+  formContainer.appendChild(inputCategory);
+  formContainer.appendChild(addButton);
+  createAddQuoteForm();
+
+}
+
 
 // Add new quote
 function addquote() {
@@ -31,13 +60,12 @@ function addquote() {
     const newText = textInput.Value.trim();
     const newCategory = categoryInput.Value.trim();
 
-    if (newText === "" || newCategory === "") {
+    if (!newText || !newCategory) {
         alert("Please fill in both fieds.");
         return;
     }
 
-    const newQuote = { text: newText, category: newCategory };
-    quotes.push(newQuote);
+    quotes.push = ({ text: newText, category: newCategory });
 
     // Optional display the new quote
     showRandomQuote();
@@ -53,3 +81,5 @@ document.getElementById('addQuoteBtn').addEventListener('click', addquote);
 
 // Initial quote display
 showRandomQuote();
+
+createAddQuoteForm(); // ✅ Now this is included!

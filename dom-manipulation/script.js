@@ -16,6 +16,11 @@ async function fetchQuotesFromServer() {
   }
 } 
 
+// ====== Sync Quotes (wrapper function) ======
+async function syncQuotes() {
+  await syncWithServer();
+}
+
 // ====== Load and Save Quotes ======
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");

@@ -154,10 +154,10 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-
-// Initial quote display
-
+// Initialize app
 loadQuotes();
-createAddQuoteForm(); 
 loadLastViewedQuote();
+
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
+document.getElementById("addQuoteBtn").addEventListener("click", addQuote);
+document.getElementById("exportBtn").addEventListener("click", exportQuotes);

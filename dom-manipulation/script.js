@@ -168,7 +168,7 @@ async function syncWithServer() {
     saveQuotes();
     populateCategories();
     filterQuote();
-    notify("✅ synced with server.");
+    notify("Quotes synced with server.");
   } catch (err) {
     notify("⚠️ Sync failed: " + err.message);
   }

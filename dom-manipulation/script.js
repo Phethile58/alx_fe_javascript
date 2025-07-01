@@ -54,7 +54,6 @@ function populateCategories() {
   categoryFilter.value = selectedCategory;
 }
 // ===== Filter and Show Quote ======
-
 function filterQuote() {
 const selected = document.getElementById("categoryFilter").value;
   selectedCategory = selected;
@@ -177,7 +176,6 @@ async function syncWithServer() {
 
 function resolveConflicts(local, server) {
   const map = new Map();
-
   server.forEach(q => map.set(q.text.toLowerCase(), q));
   local.forEach(q => {
     const key = q.text.toLowerCase();
@@ -205,10 +203,11 @@ loadQuotes();
 populateCategories();
 loadLastViewedQuote();
 filterQuote();
-setInterval(syncWithServer, 60000); // auto-sync every 60s
-syncWithServer(); // first sync
+syncQuotes(); 
+setInterval(syncQuotes, 60000); // auto-sync every 60s
+
 
 // ===== Event listeners =====
-document.getElementById('newQuote').addEventListener('click', showRandomQuote);
-document.getElementById("addQuoteBtn").addEventListener("click", addQuote);
+document.getElementById('newQuote').addEventListener('click', filterQuote);
+document.getElementById("addQuoteBtn").addEventListener("click", addquote);
 document.getElementById("exportBtn").addEventListener("click", exportQuotes);

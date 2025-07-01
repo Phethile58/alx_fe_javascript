@@ -4,25 +4,32 @@ const SERVER_URL = "https://your-server-or-json-url.com/quotes.json"; // Replace
 let quotes = [];
 let selectedCategory = "all";
 
-// ====== Load and Save ======
+// ====== Fetch Quotes From Server ======
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(SERVER_URL);
+    const serverQuotes = await response.json();
+    return serverQuotes;
+  } catch (error) {
+    notify("Error fetching from server: " + error.message);
+    return [];
+  }
+} 
+
+// ====== Load and Save Quotes ======
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
- quotes = storedQuotes ? JSON.parse(storedQuotes) : [
-    { text: "Believe you can and you're halfway there.", category: "Motivation" },
-    { text: "Be yourself; everyone else is already taken.", category: "Life" },
-    { text: "Success is not final, failure is not fatal.", category: "Success" }
-];
-saveQuotes();
+ quotes = storedQuotes ? JSON.parse(storedQuotes) : [];
 
 const storedCategory = localStorage.getItem("selectedCategory");
   if (storedCategory) {
     selectedCategory = storedCategory;
-    document.getElementById("categoryFilter").value = selectedCategory;
   }
 }
 
-function saveQuotes(){
+function saveQuotes() {
     localStorage.setItem("quotes", JSON.stringify(quotes));
+    localStorage.setItem("selectedCategory", selectedCategory);
 }
 
 // ===== Populate categories =====
@@ -41,12 +48,12 @@ function populateCategories() {
 
   categoryFilter.value = selectedCategory;
 }
-// ===== Show Quote ======
+// ===== Filter and Show Quote ======
 
 function filterQuote() {
 const selected = document.getElementById("categoryFilter").value;
   selectedCategory = selected;
-  localStorage.setItem("selectedCategory", selected);
+  saveQuotes();
 
   const filteredQuotes = selected === "all" 
   ? quotes 
@@ -57,7 +64,7 @@ const selected = document.getElementById("categoryFilter").value;
         return;
     }
 
-    const randomIndex = Math.floor(Math.random() * filteredquotes.length);
+    const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
     const quote = filteredQuotes[randomIndex];
 
    document.getElementById ("quoteDisplay").innerHTML = `
@@ -78,8 +85,8 @@ function loadLastViewedQuote() {
     `;
   }
 }
-
-function addquote() {
+// ====== Add Quote ======
+async function addquote() {
     const textInput = document.getElementById('newQuotetext');
     const categoryInput = document.getElementById('newQuoteCategory');
 
@@ -91,17 +98,28 @@ function addquote() {
         return;
     }
 
-    quotes.push = ({ text: newText, category: newCategory });
+    const newQuote={ text: newText, category: newCategory };
+    quotes.push (newQuote);
     saveQuotes();
     populateCategories();
     filterQuote(); 
 
     textInput.value = "";
     categoryInput.value = "";
+
+    try {
+    await fetch(SERVER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newQuote)
+    });
+    notify("Quote synced to server.");
+  } catch (err) {
+    notify("⚠️ Failed to sync to server.");
+  }
 }
 
 // ====== Export Quotes ======
-
 function exportQuotes() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -113,7 +131,6 @@ function exportQuotes() {
 }
 
 // ====== Import Quotes ======
-
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
   fileReader.onload = function (e) {
@@ -123,32 +140,19 @@ function importFromJsonFile(event) {
         quotes.push(...importedQuotes);
         saveQuotes();
          populateCategories();
-        alert("Quotes imported successfully!");
         filterQuote();
+        notify("✅ Quotes imported.")
       } else {
-        alert("Invalid JSON format.");
+        notify("Invalid JSON format.");
       }
     } catch (err) {
-      alert("Error reading file: " + err.message);
+      notify("Error importing: " + err.message);
     }
   };
   fileReader.readAsText(event.target.files[0]);
 }
 
-// ====== Fetch Quotes From Server ======
-
-async function fetchQuotesFromServer() {
-  try {
-    const response = await fetch(SERVER_URL);
-    const serverQuotes = await response.json();
-    return serverQuotes;
-  } catch (err) {
-    console.error("Failed to fetch quotes from server:", err);
-    return [];
-  }
-}
-
-// ====== Server Sync & Conflict Resolution ======
+// ====== Sync With Server ======
 
 async function syncWithServer() {
   try {
@@ -156,13 +160,13 @@ async function syncWithServer() {
     const localQuotes = JSON.parse(localStorage.getItem("quotes")) || [];
 
     const mergedQuotes = resolveConflicts(localQuotes, serverQuotes);
-    localStorage.setItem("quotes", JSON.stringify(mergedQuotes));
     quotes = mergedQuotes;
+    saveQuotes();
     populateCategories();
     filterQuote();
-    notify("Quotes synced with server.");
+    notify("✅ synced with server.");
   } catch (err) {
-    notify("Failed to sync with server: " + err.message);
+    notify("⚠️ Sync failed: " + err.message);
   }
 }
 
@@ -174,12 +178,10 @@ function resolveConflicts(local, server) {
     const key = q.text.toLowerCase();
     if (!map.has(key)) map.set(key, q);
   });
-
   return Array.from(map.values());
 }
 
 // ====== Notifications ======
-
 function notify(message) {
   const note = document.createElement("div");
   note.textContent = message;

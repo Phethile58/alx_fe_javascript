@@ -94,11 +94,13 @@ function addquote() {
     quotes.push = ({ text: newText, category: newCategory });
     saveQuotes();
     populateCategories();
-    filterQuote(); // Show a new quote from possibly updated category
+    filterQuote(); 
 
     textInput.value = "";
     categoryInput.value = "";
 }
+
+// ====== Export Quotes ======
 
 function exportQuotes() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
@@ -109,6 +111,8 @@ function exportQuotes() {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+// ====== Import Quotes ======
 
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
@@ -131,19 +135,31 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
+// ====== Fetch Quotes From Server ======
+
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(SERVER_URL);
+    const serverQuotes = await response.json();
+    return serverQuotes;
+  } catch (err) {
+    console.error("Failed to fetch quotes from server:", err);
+    return [];
+  }
+}
+
 // ====== Server Sync & Conflict Resolution ======
 
 async function syncWithServer() {
   try {
-    const response = await fetch(SERVER_URL);
-    const serverQuotes = await response.json();
+    const serverQuotes = await fetchQuotesFromServer();
     const localQuotes = JSON.parse(localStorage.getItem("quotes")) || [];
 
     const mergedQuotes = resolveConflicts(localQuotes, serverQuotes);
     localStorage.setItem("quotes", JSON.stringify(mergedQuotes));
     quotes = mergedQuotes;
     populateCategories();
-    filterQuotes();
+    filterQuote();
     notify("Quotes synced with server.");
   } catch (err) {
     notify("Failed to sync with server: " + err.message);

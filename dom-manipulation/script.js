@@ -8,7 +8,13 @@ let selectedCategory = "all";
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_URL);
-    const serverQuotes = await response.json();
+    const rawQuotes = await response.json();
+
+ const serverQuotes = rawQuotes.map(q => ({
+      text: q.text || q.title || "Untitled",
+      category: q.category || "General"
+    }));
+
     return serverQuotes;
   } catch (error) {
     notify("Error fetching from server: " + error.message);

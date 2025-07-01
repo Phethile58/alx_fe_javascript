@@ -7,6 +7,12 @@
   </head>
   <body>
     <h1>Dynamic Quote Generator</h1>
+        <!-- Category Filter -->
+<h2>Filter by Category</h2>
+<select id="categoryFilter" onchange="filterQuotes()">
+  <option value="all">All Categories</option>
+  <!-- Categories will be added dynamically -->
+</select>
 
     <div id="quoteDisplay">
         <p class="quote-text">Click the button to see a quote.</p>
